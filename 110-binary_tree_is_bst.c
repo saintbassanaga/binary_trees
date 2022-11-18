@@ -1,89 +1,78 @@
 #include "binary_trees.h"
-
 /**
- * binary_tree_is_leaf - checks if a node is a leaf
+ * subtree_great - returns 1 if a subtree contains only values less than n
  *
- * @node: pointer to the node to check
- * Return: 1 if node is a leaf, otherwise 0
+ * @tree: root of a subtree
+ * @n: value to check
+ * Return: 1 if a subtree contains only lesser values or 0 if not
  */
-int binary_tree_is_leaf(const binary_tree_t *node)
+
+int subtree_great(const binary_tree_t *tree, int n)
 {
-	int leaf = 0;
+	int left_res = 1, right_res = 1;
 
-	if (node && !(node->left) && !(node->right))
-		leaf = 1;
+	if (tree->left)
+		left_res = subtree_great(tree->left, n);
+	if (tree->right)
+		right_res = subtree_great(tree->right, n);
 
-	return (leaf);
-}
-
-/**
- * check_parent - checks if node has a lower/higher than its grand parent
- *
- * @tree: actual node
- * Return: 1 if actual node has an appropiartely value, 0 otherwise
- */
-int check_parent(const binary_tree_t *tree)
-{
-	const binary_tree_t *prnt;
-	const binary_tree_t *grand_prnt;
-
-	if (tree == NULL || tree->parent == NULL || tree->parent->parent == NULL)
-		return (1);
-
-	prnt = tree->parent;
-	grand_prnt = prnt->parent;
-
-	while (prnt && grand_prnt)
-	{
-		if (prnt->n < grand_prnt->n && tree->n >= grand_prnt->n)
-			return (0);
-
-		if (prnt->n > grand_prnt->n && tree->n <= grand_prnt->n)
-			return (0);
-
-		prnt = prnt->parent;
-		grand_prnt = prnt->parent;
-	}
-
-	return (1);
-}
-
-/**
- * check_is_bst - checks if binary tree is a BST
- *
- * @tree: tree root
- * Return: 1 if tree is a BST, 0 otherwise
- */
-int check_is_bst(const binary_tree_t *tree)
-{
-	if (!tree)
-		return (1);
-
-	if (binary_tree_is_leaf(tree))
-		return (1);
-
-	if (tree->left && tree->left->n >= tree->n)
+	if (tree->n >= n)
 		return (0);
 
-	if (tree->right && tree->right->n <= tree->n)
-		return (0);
-
-	if (!check_parent(tree->left) || !check_parent(tree->right))
-		return (0);
-
-	return (check_is_bst(tree->left) && check_is_bst(tree->right));
+	return (left_res * right_res);
 }
-
 /**
- * binary_tree_is_bst - calls to check_is_bst to check if tree is BST
+ * subtree_less - returns 1 if a subtree contains only values greater than n
  *
- * @tree: tree root
- * Return: 1 if tree is a BST, 0 otherwise
+ * @tree: root of a subtree
+ * @n: value to check
+ * Return: 1 if a subtree contains only greater values or 0 if not
+ */
+
+int subtree_less(const binary_tree_t *tree, int n)
+{
+	int left_res = 1, right_res = 1;
+
+	if (tree->left)
+		left_res = subtree_less(tree->left, n);
+	if (tree->right)
+		right_res = subtree_less(tree->right, n);
+
+	if (tree->n <= n)
+		return (0);
+
+	return (left_res * right_res);
+}
+/**
+ * binary_tree_is_bst - returns 1 if a tree is a correct Binary search tree
+ *
+ * @tree: root of the tree
+ * Return: 1 if the tree is BTS or 0 if not
  */
 int binary_tree_is_bst(const binary_tree_t *tree)
 {
+	int left_res = 1, right_res = 1;
+
 	if (!tree)
 		return (0);
 
-	return (check_is_bst(tree));
+	if (tree->left)
+	{
+		if (!subtree_great(tree->left, tree->n))
+			return (0);
+		left_res = binary_tree_is_bst(tree->left);
+	}
+	else
+		return (1);
+
+	if (tree->right)
+	{
+		if (!subtree_less(tree->right, tree->n))
+			return (0);
+		right_res = binary_tree_is_bst(tree->right);
+	}
+	else
+		return (1);
+
+	return (left_res * right_res);
 }
